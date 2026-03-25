@@ -2,11 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Save } from "lucide-react";
-import { useApp } from "@/context/AppContext";
+import { ArrowLeft, Save, Trash2 } from "lucide-react";
+import { useData } from "@/context/DataContext";
 
-export default function CreateScheduleScreen() {
-  const { setScreen, devices, editingSchedule, addSchedule, updateSchedule } = useApp();
+export default function CreateScheduleScreen({
+  editingId,
+  onBack,
+}: {
+  editingId: string | null;
+  onBack: () => void;
+}) {
+  const { devices, schedules, createSchedule, updateSchedule, deleteSchedule } = useData();
+
+  const editing = editingId ? schedules.find((s) => s.id === editingId) : null;
 
   const [name, setName] = useState("");
   const [timeStart, setTimeStart] = useState("09:00");
@@ -14,17 +22,19 @@ export default function CreateScheduleScreen() {
   const [selectedDevices, setSelectedDevices] = useState<string[]>([]);
   const [pauseNotifications, setPauseNotifications] = useState(false);
   const [lockEntertainment, setLockEntertainment] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (editingSchedule) {
-      setName(editingSchedule.name);
-      setTimeStart(editingSchedule.timeStart);
-      setTimeEnd(editingSchedule.timeEnd);
-      setSelectedDevices(editingSchedule.devices);
-      setPauseNotifications(editingSchedule.pauseNotifications);
-      setLockEntertainment(editingSchedule.lockEntertainment);
+    if (editing) {
+      setName(editing.name);
+      setTimeStart(editing.time_start);
+      setTimeEnd(editing.time_end);
+      setSelectedDevices(editing.device_ids || []);
+      setPauseNotifications(editing.pause_notifications);
+      setLockEntertainment(editing.lock_entertainment);
     }
-  }, [editingSchedule]);
+  }, [editing]);
 
   const toggleDevice = (id: string) => {
     setSelectedDevices((prev) =>
@@ -32,23 +42,46 @@ export default function CreateScheduleScreen() {
     );
   };
 
-  const handleSave = () => {
-    const data = {
-      name,
-      timeStart,
-      timeEnd,
-      devices: selectedDevices,
-      pauseNotifications,
-      lockEntertainment,
-      status: "scheduled" as const,
-      icon: "BookOpen",
-    };
-    if (editingSchedule) {
-      updateSchedule({ ...data, id: editingSchedule.id });
-    } else {
-      addSchedule(data);
+  const handleSave = async () => {
+    if (!name.trim()) return;
+    setLoading(true);
+    setError("");
+    try {
+      const data = {
+        name: name.trim(),
+        time_start: timeStart,
+        time_end: timeEnd,
+        days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        pause_notifications: pauseNotifications,
+        lock_entertainment: lockEntertainment,
+        status: "scheduled" as const,
+        icon: "BookOpen",
+      };
+
+      if (editing) {
+        await updateSchedule(editing.id, data, selectedDevices);
+      } else {
+        await createSchedule(data, selectedDevices);
+      }
+      onBack();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to save");
+    } finally {
+      setLoading(false);
     }
-    setScreen("dashboard");
+  };
+
+  const handleDelete = async () => {
+    if (!editing) return;
+    setLoading(true);
+    try {
+      await deleteSchedule(editing.id);
+      onBack();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to delete");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -59,7 +92,7 @@ export default function CreateScheduleScreen() {
       className="min-h-screen bg-background px-6 py-12"
     >
       <button
-        onClick={() => setScreen("dashboard")}
+        onClick={onBack}
         className="flex items-center gap-1 text-muted-foreground mb-6 hover:text-foreground transition-colors"
       >
         <ArrowLeft size={18} />
@@ -67,14 +100,13 @@ export default function CreateScheduleScreen() {
       </button>
 
       <h1 className="text-2xl font-heading font-bold mb-6">
-        {editingSchedule ? "Edit Routine" : "Create Routine"}
+        {editing ? "Edit Routine" : "Create Routine"}
       </h1>
 
       <div className="space-y-5">
-        {/* Schedule Name */}
         <div>
           <label className="text-sm font-medium text-muted-foreground mb-1.5 block">
-            Schedule Name
+            Routine Name
           </label>
           <input
             type="text"
@@ -85,12 +117,9 @@ export default function CreateScheduleScreen() {
           />
         </div>
 
-        {/* Time */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-sm font-medium text-muted-foreground mb-1.5 block">
-              Start Time
-            </label>
+            <label className="text-sm font-medium text-muted-foreground mb-1.5 block">Start</label>
             <input
               type="time"
               value={timeStart}
@@ -99,9 +128,7 @@ export default function CreateScheduleScreen() {
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-muted-foreground mb-1.5 block">
-              End Time
-            </label>
+            <label className="text-sm font-medium text-muted-foreground mb-1.5 block">End</label>
             <input
               type="time"
               value={timeEnd}
@@ -111,41 +138,41 @@ export default function CreateScheduleScreen() {
           </div>
         </div>
 
-        {/* Devices */}
         <div>
           <label className="text-sm font-medium text-muted-foreground mb-2 block">
-            Devices
+            Devices to block ({selectedDevices.length} selected)
           </label>
-          <div className="space-y-2">
-            {devices.map((device) => {
-              const selected = selectedDevices.includes(device.id);
-              return (
-                <button
-                  key={device.id}
-                  onClick={() => toggleDevice(device.id)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all ${
-                    selected
-                      ? "border-primary bg-primary/5"
-                      : "border-input bg-card"
-                  }`}
-                >
-                  <div
-                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                      selected ? "border-primary" : "border-muted-foreground"
+          {devices.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">
+              No devices yet. Add devices from the Devices tab first.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {devices.map((device) => {
+                const selected = selectedDevices.includes(device.id);
+                return (
+                  <button
+                    key={device.id}
+                    onClick={() => toggleDevice(device.id)}
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all ${
+                      selected ? "border-primary bg-primary/5" : "border-input bg-card"
                     }`}
                   >
-                    {selected && (
-                      <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                    )}
-                  </div>
-                  <span className="font-medium">{device.name}</span>
-                </button>
-              );
-            })}
-          </div>
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                        selected ? "border-primary" : "border-muted-foreground"
+                      }`}
+                    >
+                      {selected && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                    </div>
+                    <span className="font-medium">{device.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Toggles */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="font-medium">Pause Notifications</span>
@@ -179,14 +206,31 @@ export default function CreateScheduleScreen() {
           </div>
         </div>
 
-        {/* Save */}
+        {error && (
+          <p className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg">
+            {error}
+          </p>
+        )}
+
         <button
           onClick={handleSave}
-          className="w-full flex items-center justify-center gap-2 py-4 rounded-lg bg-primary text-primary-foreground font-bold text-lg hover:opacity-90 active:scale-[0.98] transition-all"
+          disabled={loading || !name.trim()}
+          className="w-full flex items-center justify-center gap-2 py-4 rounded-lg bg-primary text-primary-foreground font-bold text-lg hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
         >
           <Save size={20} />
-          Save Routine
+          {loading ? "Saving..." : "Save Routine"}
         </button>
+
+        {editing && (
+          <button
+            onClick={handleDelete}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-destructive/10 text-destructive font-semibold hover:opacity-90 active:scale-[0.98] transition-all"
+          >
+            <Trash2 size={18} />
+            Delete Routine
+          </button>
+        )}
       </div>
     </motion.div>
   );

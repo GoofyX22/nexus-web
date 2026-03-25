@@ -1,7 +1,6 @@
 "use client";
 
 import { LayoutDashboard, CalendarDays, Monitor, Settings } from "lucide-react";
-import { useApp } from "@/context/AppContext";
 
 const tabs = [
   { screen: "dashboard" as const, icon: LayoutDashboard, label: "Dashboard" },
@@ -10,9 +9,15 @@ const tabs = [
   { screen: "settings" as const, icon: Settings, label: "Settings" },
 ];
 
-export default function BottomNav() {
-  const { currentScreen, setScreen } = useApp();
-  const showOn = ["dashboard", "devices", "weekly", "settings"];
+const showOn = ["dashboard", "devices", "weekly", "settings"];
+
+export default function BottomNav({
+  currentScreen,
+  onNavigate,
+}: {
+  currentScreen: string;
+  onNavigate: (screen: string) => void;
+}) {
   if (!showOn.includes(currentScreen)) return null;
 
   return (
@@ -23,7 +28,7 @@ export default function BottomNav() {
           return (
             <button
               key={screen}
-              onClick={() => setScreen(screen)}
+              onClick={() => onNavigate(screen)}
               className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors ${
                 active
                   ? "text-primary"
