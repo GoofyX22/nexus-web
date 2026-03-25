@@ -58,7 +58,8 @@ function AuthGate() {
 function AppRouter() {
   const { profile } = useAuth();
   const { householdId } = useData();
-  const [currentScreen, setScreen] = useState<Screen>("dashboard");
+  const [currentScreen, setCurrentScreen] = useState<Screen>("dashboard");
+  const setScreen = (s: string) => setCurrentScreen(s as Screen);
   const [editingScheduleId, setEditingScheduleId] = useState<string | null>(null);
   const [activeScheduleId, setActiveScheduleId] = useState<string | null>(null);
 
