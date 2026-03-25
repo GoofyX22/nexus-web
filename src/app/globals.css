@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 20% 98%;
+    --foreground: 220 26% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 26% 14%;
+    --primary: 220 80% 70%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 40 20% 95%;
+    --secondary-foreground: 220 26% 14%;
+    --muted: 40 15% 93%;
+    --muted-foreground: 220 10% 46%;
+    --accent: 160 77% 67%;
+    --accent-foreground: 160 50% 18%;
+    --active-green: 160 77% 67%;
+    --scheduled-blue: 220 80% 70%;
+    --paused-gray: 220 10% 46%;
+    --destructive: 0 60% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 220 80% 70%;
+    --radius: 1.25rem;
+    --text-soft: 220 10% 46%;
+    --surface-warm: 40 20% 95%;
+  }
+
+  .dark {
+    --background: 220 26% 8%;
+    --foreground: 40 20% 95%;
+    --card: 220 20% 12%;
+    --card-foreground: 40 20% 95%;
+    --primary: 220 80% 70%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 20% 18%;
+    --secondary-foreground: 40 20% 95%;
+    --muted: 220 20% 16%;
+    --muted-foreground: 220 10% 55%;
+    --accent: 160 77% 67%;
+    --accent-foreground: 160 50% 18%;
+    --active-green: 160 77% 67%;
+    --scheduled-blue: 220 80% 70%;
+    --paused-gray: 220 10% 55%;
+    --destructive: 0 60% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
+    --ring: 220 80% 70%;
+    --surface-warm: 220 20% 14%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: "DM Sans", sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Nunito", sans-serif;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 9999px;
+}
