@@ -127,13 +127,21 @@ export default function ChildDeviceScreen() {
         .update({ paired: true, status: "active" })
         .eq("id", device.id);
 
-      // Create enforcement status row
-      await supabase.from("enforcement_status").upsert({
-        device_id: device.id,
-        is_blocked: false,
-        active_schedule_id: null,
-        updated_at: new Date().toISOString(),
-      });
+      // Create enforcement status row only if one doesn't exist yet
+      const { data: existing } = await supabase
+        .from("enforcement_status")
+        .select("device_id")
+        .eq("device_id", device.id)
+        .single();
+
+      if (!existing) {
+        await supabase.from("enforcement_status").insert({
+          device_id: device.id,
+          is_blocked: false,
+          active_schedule_id: null,
+          updated_at: new Date().toISOString(),
+        });
+      }
 
       // Store locally
       localStorage.setItem("nexus_device_id", device.id);
