@@ -15,6 +15,7 @@ import DeviceOverviewScreen from "@/screens/DeviceOverviewScreen";
 import WeeklyRoutineScreen from "@/screens/WeeklyRoutineScreen";
 import SettingsScreen from "@/screens/SettingsScreen";
 import ChildDeviceScreen from "@/screens/ChildDeviceScreen";
+import ChildrenScreen from "@/screens/ChildrenScreen";
 
 type Screen =
   | "dashboard"
@@ -23,6 +24,7 @@ type Screen =
   | "devices"
   | "weekly"
   | "settings"
+  | "children"
   | "child-device";
 
 function AuthGate() {
@@ -97,6 +99,7 @@ function AppRouter() {
         onBack={() => setScreen("dashboard")}
       />
     ),
+    children: <ChildrenScreen onBack={() => setScreen("dashboard")} />,
     devices: <DeviceOverviewScreen onBack={() => setScreen("dashboard")} />,
     weekly: <WeeklyRoutineScreen onBack={() => setScreen("dashboard")} />,
     settings: <SettingsScreen />,

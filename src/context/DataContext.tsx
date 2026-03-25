@@ -50,6 +50,7 @@ interface DataContextType {
   removeChild: (id: string) => Promise<void>;
   addDevice: (name: string, type: Device["type"]) => Promise<void>;
   removeDevice: (id: string) => Promise<void>;
+  assignDeviceToChild: (deviceId: string, childId: string | null) => Promise<void>;
   createSchedule: (data: Omit<Schedule, "id" | "household_id" | "created_by">, deviceIds: string[]) => Promise<void>;
   updateSchedule: (id: string, data: Partial<Schedule>, deviceIds?: string[]) => Promise<void>;
   deleteSchedule: (id: string) => Promise<void>;
@@ -172,6 +173,17 @@ export function DataProvider({ children: reactChildren }: { children: React.Reac
     const { error: err } = await supabase.from("devices").delete().eq("id", id);
     if (err) throw err;
     setDevices((prev) => prev.filter((d) => d.id !== id));
+  };
+
+  const assignDeviceToChild = async (deviceId: string, childId: string | null) => {
+    const { error: err } = await supabase
+      .from("devices")
+      .update({ assigned_to: childId })
+      .eq("id", deviceId);
+    if (err) throw err;
+    setDevices((prev) =>
+      prev.map((d) => (d.id === deviceId ? { ...d, assigned_to: childId } : d))
+    );
   };
 
   const createSchedule = async (
@@ -316,6 +328,7 @@ export function DataProvider({ children: reactChildren }: { children: React.Reac
         removeChild,
         addDevice,
         removeDevice,
+        assignDeviceToChild,
         createSchedule,
         updateSchedule,
         deleteSchedule,

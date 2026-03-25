@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import {
-  BookOpen, Moon, Utensils, SmartphoneCharging, ChevronRight, Plus, Monitor,
+  BookOpen, Moon, Utensils, SmartphoneCharging, ChevronRight, Plus, Monitor, Users,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useData, Schedule } from "@/context/DataContext";
@@ -135,20 +135,27 @@ export default function DashboardScreen({
           )}
 
           {/* Actions */}
-          <div className="grid grid-cols-2 gap-3 mt-6">
+          <div className="grid grid-cols-3 gap-3 mt-6">
             <button
               onClick={() => onNavigate("create-schedule")}
-              className="flex items-center justify-center gap-2 p-4 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 active:scale-[0.98] transition-all"
+              className="flex flex-col items-center justify-center gap-1.5 p-4 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 active:scale-[0.98] transition-all"
             >
               <Plus size={18} />
-              New Routine
+              <span className="text-xs">New Routine</span>
+            </button>
+            <button
+              onClick={() => onNavigate("children")}
+              className="flex flex-col items-center justify-center gap-1.5 p-4 rounded-xl bg-active-green/20 text-accent-foreground font-semibold hover:opacity-90 active:scale-[0.98] transition-all"
+            >
+              <Users size={18} />
+              <span className="text-xs">Children</span>
             </button>
             <button
               onClick={() => onNavigate("devices")}
-              className="flex items-center justify-center gap-2 p-4 rounded-xl bg-secondary text-secondary-foreground font-semibold hover:opacity-90 active:scale-[0.98] transition-all"
+              className="flex flex-col items-center justify-center gap-1.5 p-4 rounded-xl bg-secondary text-secondary-foreground font-semibold hover:opacity-90 active:scale-[0.98] transition-all"
             >
               <Monitor size={18} />
-              Devices
+              <span className="text-xs">Devices</span>
             </button>
           </div>
         </>
