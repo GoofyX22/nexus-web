@@ -181,20 +181,9 @@ alter table public.enforcement_status enable row level security;
 create policy "Users can view own profile"
   on public.profiles for select using (id = auth.uid());
 
--- Security definer function to avoid infinite recursion in RLS
-create or replace function public.get_my_household_id()
-returns uuid
-language sql
-security definer
-stable
-set search_path = public
-as $$
-  select household_id from public.profiles where id = auth.uid();
-$$;
-
 create policy "Users can view household members"
   on public.profiles for select using (
-    household_id = public.get_my_household_id()
+    household_id in (select household_id from public.profiles where id = auth.uid())
   );
 
 create policy "Users can update own profile"

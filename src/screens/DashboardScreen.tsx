@@ -34,11 +34,7 @@ export default function DashboardScreen({
   const blockedDevices = devices.filter((d) => d.status === "blocked").length;
 
   const handleScheduleClick = (schedule: Schedule) => {
-    if (schedule.status === "active") {
-      onActiveFocus(schedule.id);
-    } else {
-      onEditSchedule(schedule.id);
-    }
+    onActiveFocus(schedule.id);
   };
 
   return (

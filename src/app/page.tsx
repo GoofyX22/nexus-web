@@ -73,8 +73,8 @@ function AppRouter() {
       <DashboardScreen
         onNavigate={setScreen}
         onEditSchedule={(id) => {
-          setEditingScheduleId(id);
-          setScreen("create-schedule");
+          setActiveScheduleId(id);
+          setScreen("active-focus");
         }}
         onActiveFocus={(id) => {
           setActiveScheduleId(id);
