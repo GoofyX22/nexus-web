@@ -32,23 +32,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .single();
+    // Retry up to 3 times with increasing delay (handles RLS timing + trigger delay)
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", userId)
+          .single();
 
-    if (error) {
-      // Profile might not exist yet (trigger delay), retry once
-      await new Promise((r) => setTimeout(r, 1000));
-      const { data: retry } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
-      if (retry) setProfile(retry);
-    } else {
-      setProfile(data);
+        if (data) {
+          setProfile(data);
+          return;
+        }
+        if (error) {
+          console.warn(`Profile fetch attempt ${attempt + 1} failed:`, error.message);
+        }
+      } catch (e) {
+        console.warn(`Profile fetch attempt ${attempt + 1} exception:`, e);
+      }
+      // Wait before retrying (500ms, 1500ms, 3000ms)
+      await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
     }
   }, []);
 
