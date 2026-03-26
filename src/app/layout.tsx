@@ -42,9 +42,7 @@ export default function RootLayout({
             `,
           }}
         />
-        <div className="max-w-md mx-auto min-h-screen relative">
-          {children}
-        </div>
+        {children}
       </body>
     </html>
   );

@@ -126,8 +126,10 @@ function AppRouter() {
 
 export default function Home() {
   return (
-    <AuthProvider>
-      <AuthGate />
-    </AuthProvider>
+    <div className="max-w-md mx-auto min-h-screen relative">
+      <AuthProvider>
+        <AuthGate />
+      </AuthProvider>
+    </div>
   );
 }
